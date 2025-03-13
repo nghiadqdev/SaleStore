@@ -46,9 +46,19 @@ const ProfileCompletionPage = () => {
   const handleProfileComplete = async (data: any) => {
     try {
       if (isSupabaseConfigured()) {
-        // In a real app, you would save this data to your database
-        const { error } = await supabase.from("profiles").upsert({
-          id: (await supabase.auth.getUser()).data.user?.id,
+        // Get current user
+        const { data: userData, error: userError } =
+          await supabase.auth.getUser();
+        if (userError) throw userError;
+
+        if (!userData.user) {
+          throw new Error("User not authenticated");
+        }
+
+        // Save profile data
+        const { error: profileError } = await supabase.from("profiles").upsert({
+          id: userData.user.id,
+          email: userData.user.email,
           phone_number: data.phoneNumber,
           gender: data.gender,
           address: data.address,
@@ -56,7 +66,27 @@ const ProfileCompletionPage = () => {
           updated_at: new Date(),
         });
 
-        if (error) throw error;
+        if (profileError) throw profileError;
+
+        // Also update Customer table if it exists
+        const { error: customerError } = await supabase.from("Customer").upsert(
+          {
+            username: userData.user.email,
+            phoneNumber: data.phoneNumber,
+            gender: data.gender,
+            address: data.address,
+            dateOfBirth: data.dateOfBirth,
+            update_at: new Date(),
+          },
+          {
+            onConflict: "username",
+          },
+        );
+
+        if (customerError) {
+          console.warn("Could not update Customer table:", customerError);
+          // Continue even if Customer update fails
+        }
       }
 
       // Navigate to dashboard after successful profile completion

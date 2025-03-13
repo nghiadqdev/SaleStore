@@ -2,6 +2,7 @@ import { Suspense, lazy } from "react";
 import { useRoutes, Routes, Route, Navigate } from "react-router-dom";
 import Home from "./components/home";
 import routes from "tempo-routes";
+import { Toaster } from "@/components/ui/toaster";
 
 // Lazy load components for better performance
 const AuthCallback = lazy(() => import("./components/auth/AuthCallback"));
@@ -9,6 +10,7 @@ const ProfileCompletionPage = lazy(
   () => import("./components/auth/ProfileCompletionPage"),
 );
 const Dashboard = lazy(() => import("./components/dashboard/Dashboard"));
+const SignUpPage = lazy(() => import("./components/auth/SignUpPage"));
 
 function App() {
   return (
@@ -20,6 +22,9 @@ function App() {
       }
     >
       <>
+        {/* Tempo routes */}
+        {import.meta.env.VITE_TEMPO === "true" && useRoutes(routes)}
+
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
@@ -28,12 +33,18 @@ function App() {
             element={<ProfileCompletionPage />}
           />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="*" element={<Navigate to="/" />} />
+          <Route path="/signup" element={<SignUpPage />} />
+
+          {/* Add this before the catchall route */}
           {import.meta.env.VITE_TEMPO === "true" && (
             <Route path="/tempobook/*" />
           )}
+
+          <Route path="*" element={<Navigate to="/" />} />
         </Routes>
-        {import.meta.env.VITE_TEMPO === "true" && useRoutes(routes)}
+
+        {/* Toast notifications */}
+        <Toaster />
       </>
     </Suspense>
   );

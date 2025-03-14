@@ -2,13 +2,12 @@ import { Suspense, lazy } from "react";
 import { useRoutes, Routes, Route, Navigate } from "react-router-dom";
 import Home from "./components/home";
 import routes from "tempo-routes";
-
 // Lazy load components for better performance
 const AuthCallback = lazy(() => import("./components/auth/AuthCallback"));
 const ProfileCompletionPage = lazy(
   () => import("./components/auth/ProfileCompletionPage"),
 );
-const Dashboard = lazy(() => import("./components/dashboard/Dashboard"));
+const Dashboard = lazy(() => import("./dashboard/Dashboard"));
 
 function App() {
   return (
@@ -29,11 +28,11 @@ function App() {
           />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="*" element={<Navigate to="/" />} />
-          {import.meta.env.VITE_TEMPO === "true" && (
+          {/* {import.meta.env.VITE_TEMPO === "true" && (
             <Route path="/tempobook/*" />
-          )}
+          )} */}
         </Routes>
-        {import.meta.env.VITE_TEMPO === "true" && useRoutes(routes)}
+        {/* {import.meta.env.VITE_TEMPO === "true" && useRoutes(routes)} */}
       </>
     </Suspense>
   );
